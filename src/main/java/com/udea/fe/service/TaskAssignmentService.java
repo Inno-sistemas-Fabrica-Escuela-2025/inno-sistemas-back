@@ -10,29 +10,23 @@ import com.udea.fe.entity.User;
 import com.udea.fe.repository.TaskAssignmentRepository;
 import com.udea.fe.repository.TaskRepository;
 import com.udea.fe.repository.UserRepository;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
+@AllArgsConstructor
 public class TaskAssignmentService {
 
-  @Autowired
-  private TaskRepository taskRepository;
+  private final TaskRepository taskRepository;
+  private final TaskAssignmentRepository taskAssignmentRepository;
+  private final UserRepository userRepository;
+  private final NotificationService notificationService;
 
-  @Autowired
-  private TaskAssignmentRepository taskAssignmentRepository;
-
-  @Autowired
-  private UserRepository userRepository;
-
-  @Autowired
-  private NotificationService notificationService;
-
-  public TaskAssignmentResponseDTO assignTask(
-    TaskAssignmentRequestDTO request
-  ) {
+  public TaskAssignmentResponseDTO assignTask(TaskAssignmentRequestDTO request) {
     Task task = taskRepository
       .findById(request.getTaskId())
       .orElseThrow(() -> new RuntimeException("Tarea no encontrada"));
@@ -65,9 +59,7 @@ public class TaskAssignmentService {
   }
 
   public List<User> getUsersAssignedToTask(Long taskId) {
-    List<TaskAssignment> assignments = taskAssignmentRepository.findById_TaskId(
-      taskId
-    );
+    List<TaskAssignment> assignments = taskAssignmentRepository.findById_TaskId(taskId);
 
     return assignments
       .stream()

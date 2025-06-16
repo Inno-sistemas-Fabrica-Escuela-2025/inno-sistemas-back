@@ -10,29 +10,21 @@ import com.udea.fe.repository.SubmissionRepository;
 import com.udea.fe.repository.TaskRepository;
 import com.udea.fe.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
-import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
 @AllArgsConstructor
 public class SubmissionService {
 
-  @Autowired
-  private SubmissionRepository submissionRepository;
-
-  @Autowired
-  private TaskRepository taskRepository;
-
-  @Autowired
-  private UserRepository userRepository;
-
-  @Autowired
-  private NotificationService notificationService;
+  private final SubmissionRepository submissionRepository;
+  private final TaskRepository taskRepository;
+  private final UserRepository userRepository;
+  private final NotificationService notificationService;
 
   public SubmissionResponseDTO createSubmission(SubmissionRequestDTO request) {
     Submission submission = new Submission();
@@ -80,7 +72,7 @@ public class SubmissionService {
         dto.setUserId(sub.getUser().getUserId());
         return dto;
       })
-      .collect(Collectors.toList());
+      .toList();
   }
 
   public SubmissionResponseDTO getSubmissionById(Long id) {
@@ -95,10 +87,7 @@ public class SubmissionService {
     return dto;
   }
 
-  public List<SubmissionResponseDTO> getSubmissionsByTaskId(
-    Long taskId,
-    String userEmail
-  ) {
+  public List<SubmissionResponseDTO> getSubmissionsByTaskId(Long taskId, String userEmail) {
     User user = userRepository
       .findByEmail(userEmail)
       .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -107,15 +96,11 @@ public class SubmissionService {
 
     List<Submission> submissions;
     if (isTeacher) {
-      // Profesor: todas las entregas de la tarea
       submissions = submissionRepository.findByTask_TaskId(taskId);
     } else {
-      // Otro rol: solo entregas hechas por el usuario
-      submissions =
-        submissionRepository.findByTask_TaskIdAndUser_UserId(
-          taskId,
-          user.getUserId()
-        );
+      submissions = submissionRepository.findByTask_TaskIdAndUser_UserId(
+        taskId, user.getUserId()
+      );
     }
 
     return submissions
@@ -131,6 +116,6 @@ public class SubmissionService {
         dto.setUserName(sub.getUser().getName());
         return dto;
       })
-      .collect(Collectors.toList());
+      .toList();
   }
 }

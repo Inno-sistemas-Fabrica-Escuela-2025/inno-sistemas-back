@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -33,7 +32,6 @@ public class TaskService {
 
     private static final Logger logger = LoggerFactory.getLogger(TaskService.class);
 
-    // Mensajes centralizados
     private static final String MSG_PROYECTO_NO_ENCONTRADO = "Proyecto no encontrado";
     private static final String MSG_USUARIO_NO_ENCONTRADO = "Usuario no encontrado";
     private static final String MSG_TAREA_NO_ENCONTRADA = "Tarea no encontrada";
@@ -90,7 +88,7 @@ public class TaskService {
     public List<TaskDTO> getAllTasks() {
         return taskRepository.findAll().stream()
                 .map(task -> modelMapper.map(task, TaskDTO.class))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public TaskDTO updateTask(Long id, TaskDTO taskDTO) {
@@ -152,18 +150,18 @@ public class TaskService {
         if (isTeacher && isInProjectTeam) {
             return taskRepository.findByProject_ProjectId(projectId).stream()
                     .map(task -> modelMapper.map(task, TaskDTO.class))
-                    .collect(Collectors.toList());
+                    .toList();
         } else {
             List<Long> assignedTaskIds = taskAssignmentRepository
                     .findById_AssignedIdAndId_AssignedType(user.getUserId(), "USER")
                     .stream()
                     .map(a -> a.getTask().getTaskId())
-                    .collect(Collectors.toList());
+                    .toList();
 
             return taskRepository.findByProject_ProjectId(projectId).stream()
                     .filter(task -> assignedTaskIds.contains(task.getTaskId()))
                     .map(task -> modelMapper.map(task, TaskDTO.class))
-                    .collect(Collectors.toList());
+                    .toList();
         }
     }
 }
