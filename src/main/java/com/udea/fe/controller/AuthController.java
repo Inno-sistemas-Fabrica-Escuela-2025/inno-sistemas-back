@@ -7,22 +7,25 @@ import com.udea.fe.entity.User;
 import com.udea.fe.repository.UserRepository;
 import com.udea.fe.security.service.AuthService;
 
-import lombok.RequiredArgsConstructor;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
 public class AuthController {
 
   private final AuthService authService;
   private final UserRepository userRepository;
   private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
+  public AuthController(AuthService authService, UserRepository userRepository) {
+    this.authService = authService;
+    this.userRepository = userRepository;
+  }
 
   @PostMapping("/login")
   public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
@@ -40,7 +43,7 @@ public class AuthController {
   @GetMapping("/me")
   public ResponseEntity<UserDTO> getCurrentUser(Authentication authentication) {
     logger.info("Obtener usuario autenticado");
-    
+
     if (authentication == null || !authentication.isAuthenticated()) {
       logger.warn("Usuario no autenticado");
       return ResponseEntity.status(401).build();
@@ -50,8 +53,8 @@ public class AuthController {
     logger.debug("Principal: {}", principal);
     logger.debug("Tipo de principal: {}", principal.getClass());
 
-    if (principal instanceof org.springframework.security.core.userdetails.User) {
-      String username = ((org.springframework.security.core.userdetails.User) principal).getUsername();
+    if (principal instanceof org.springframework.security.core.userdetails.User userDetails) {
+      String username = userDetails.getUsername();
       User userEntity = userRepository.findByEmail(username).orElse(null);
 
       if (userEntity == null) {
