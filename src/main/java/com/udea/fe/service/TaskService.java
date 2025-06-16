@@ -33,7 +33,7 @@ public class TaskService {
 
     private static final Logger logger = LoggerFactory.getLogger(TaskService.class);
 
-    // 🔸 Mensajes centralizados
+    // Mensajes centralizados
     private static final String MSG_PROYECTO_NO_ENCONTRADO = "Proyecto no encontrado";
     private static final String MSG_USUARIO_NO_ENCONTRADO = "Usuario no encontrado";
     private static final String MSG_TAREA_NO_ENCONTRADA = "Tarea no encontrada";

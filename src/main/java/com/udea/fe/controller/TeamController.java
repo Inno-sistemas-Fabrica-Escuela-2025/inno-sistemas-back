@@ -25,19 +25,19 @@ public class TeamController {
 
     @PostMapping("create_team")
     public ResponseEntity<TeamDTO> createTeam(@RequestBody TeamDTO teamDTO) {
-        logger.info("Creando un nuevo equipo: {}", teamDTO.getName());
+        logger.info("Solicitud para crear un nuevo equipo recibida");
         return new ResponseEntity<>(teamService.createTeam(teamDTO), HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<TeamDTO> getTeamById(@PathVariable Long id) {
-        logger.info("Obteniendo información del equipo con ID: {}", id);
+        logger.info("Solicitud para obtener información de un equipo por ID");
         return ResponseEntity.ok(teamService.getTeamById(id));
     }
 
     @GetMapping("/project/{projectId}/all")
     public ResponseEntity<List<TeamDTO>> getTeamsByProject(@PathVariable Long projectId) {
-        logger.info("Listando todos los equipos del proyecto con ID: {}", projectId);
+        logger.info("Solicitud para listar equipos de un proyecto");
         return ResponseEntity.ok(teamService.getTeamsByProject(projectId));
     }
 
@@ -46,13 +46,13 @@ public class TeamController {
             @PathVariable Long id,
             @RequestBody TeamDTO teamDTO
     ) {
-        logger.info("Actualizando equipo con ID: {} | Nuevos datos: {}", id, teamDTO.getName());
+        logger.info("Solicitud para actualizar un equipo");
         return ResponseEntity.ok(teamService.updateTeam(id, teamDTO));
     }
 
     @DeleteMapping("/{id}/delete")
     public ResponseEntity<String> deleteTeam(@PathVariable Long id) {
-        logger.info("Eliminando equipo con ID: {}", id);
+        logger.info("Solicitud para eliminar un equipo");
         teamService.deleteTeam(id);
         return ResponseEntity.ok("Equipo eliminado correctamente.");
     }
@@ -63,14 +63,14 @@ public class TeamController {
             @PathVariable Long userId,
             @RequestParam(defaultValue = "Miembro") String roleInGroup
     ) {
-        logger.info("Agregando usuario con ID: {} al equipo con ID: {} como: {}", userId, teamId, roleInGroup);
+        logger.info("Solicitud para agregar usuario a un equipo");
         teamService.addUserToTeam(userId, teamId, roleInGroup);
         return ResponseEntity.ok("Usuario agregado al equipo correctamente.");
     }
 
     @GetMapping("/{teamId}/users")
     public ResponseEntity<List<UserTeam>> getUsersByTeam(@PathVariable Long teamId) {
-        logger.info("Listando usuarios del equipo con ID: {}", teamId);
+        logger.info("Solicitud para obtener usuarios de un equipo");
         return ResponseEntity.ok(teamService.getUsersByTeam(teamId));
     }
 
@@ -79,7 +79,7 @@ public class TeamController {
             @PathVariable Long teamId,
             @PathVariable Long userId
     ) {
-        logger.info("Eliminando usuario con ID: {} del equipo con ID: {}", userId, teamId);
+        logger.info("Solicitud para eliminar usuario de un equipo");
         teamService.removeUserFromTeam(userId, teamId);
         return ResponseEntity.ok("Usuario eliminado del equipo correctamente.");
     }
