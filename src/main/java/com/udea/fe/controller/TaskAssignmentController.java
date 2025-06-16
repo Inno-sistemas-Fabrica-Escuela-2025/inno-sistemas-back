@@ -2,6 +2,9 @@ package com.udea.fe.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,30 +18,32 @@ import com.udea.fe.service.TaskAssignmentService;
 @RequestMapping("/api/task-assignments")
 public class TaskAssignmentController {
 
+    private static final Logger logger = LoggerFactory.getLogger(TaskAssignmentController.class);
+
     @Autowired
     private TaskAssignmentService taskAssignmentService;
 
     @PostMapping
-    public ResponseEntity<?> assignTask(@RequestBody TaskAssignmentRequestDTO request) {
+    public ResponseEntity<TaskAssignmentResponseDTO> assignTask(@RequestBody TaskAssignmentRequestDTO request) {
         try {
-            System.out.println("Asignando tarea al usuario con ID: " + request.getAssignedId() + " y tarea ID: " + request.getTaskId());
+            logger.info("Asignando tarea al usuario con ID: {} y tarea ID: {}", request.getAssignedId(), request.getTaskId());
             TaskAssignmentResponseDTO response = taskAssignmentService.assignTask(request);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            System.err.println("Error al asignar la tarea: " + e.getMessage());
-            return ResponseEntity.badRequest().body("Error al asignar la tarea: " + e.getMessage());
+            logger.error("Error al asignar la tarea: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().build();
         }
     }
 
     @GetMapping("/task/{taskId}/users")
-    public ResponseEntity<?> getUsersAssignedToTask(@PathVariable Long taskId) {
+    public ResponseEntity<List<User>> getUsersAssignedToTask(@PathVariable Long taskId) {
         try {
-            System.out.println("Obteniendo usuarios asignados a la tarea con ID: " + taskId);
+            logger.info("Obteniendo usuarios asignados a la tarea con ID: {}", taskId);
             List<User> users = taskAssignmentService.getUsersAssignedToTask(taskId);
             return ResponseEntity.ok(users);
         } catch (Exception e) {
-            System.err.println("Error al obtener usuarios asignados: " + e.getMessage());
-            return ResponseEntity.badRequest().body("Error al obtener usuarios asignados: " + e.getMessage());
+            logger.error("Error al obtener usuarios asignados: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().build();
         }
     }
 }
