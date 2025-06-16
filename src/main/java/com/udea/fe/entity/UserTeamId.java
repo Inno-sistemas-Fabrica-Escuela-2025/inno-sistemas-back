@@ -13,4 +13,13 @@ import java.io.Serializable;
 public class UserTeamId  implements Serializable {
     private Long userId;
     private Long teamId;
+
+    // Constructor sin argumentos (requerido por JPA)
+    public UserTeamId() {}
+
+    // Constructor con argumentos (opcional pero útil)
+    public UserTeamId(Long userId, Long teamId) {
+        this.userId = userId;
+        this.teamId = teamId;
+    }
 }
