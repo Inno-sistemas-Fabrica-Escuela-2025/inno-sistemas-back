@@ -3,7 +3,11 @@ package com.udea.fe.controller;
 import com.udea.fe.DTO.FeedbackDTO;
 import com.udea.fe.service.FeedbackService;
 import java.util.List;
+
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,12 +17,12 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 public class FeedbackController {
 
+  private static final Logger logger = LoggerFactory.getLogger(FeedbackController.class);
+
   private final FeedbackService feedbackService;
 
   @PostMapping("/create_feedback")
-  public ResponseEntity<FeedbackDTO> createFeedback(
-    @RequestBody FeedbackDTO feedbackDTO
-  ) {
+  public ResponseEntity<FeedbackDTO> createFeedback(@RequestBody FeedbackDTO feedbackDTO) {
     FeedbackDTO createdFeedback = feedbackService.createFeedback(feedbackDTO);
     return new ResponseEntity<>(createdFeedback, HttpStatus.CREATED);
   }
@@ -28,10 +32,7 @@ public class FeedbackController {
     @PathVariable Long id,
     @RequestBody FeedbackDTO feedbackDTO
   ) {
-    FeedbackDTO updatedFeedback = feedbackService.updateFeedback(
-      id,
-      feedbackDTO
-    );
+    FeedbackDTO updatedFeedback = feedbackService.updateFeedback(id, feedbackDTO);
     return ResponseEntity.ok(updatedFeedback);
   }
 
@@ -57,18 +58,12 @@ public class FeedbackController {
   public ResponseEntity<List<FeedbackDTO>> getFeedbacksBySubmission(
     @PathVariable Long submissionId
   ) {
-    System.out.println(
-      "Llamada a getFeedbacksBySubmission con submissionId: " + submissionId
-    );
+    logger.info("Llamada a getFeedbacksBySubmission con submissionId: {}", submissionId);
     try {
-      List<FeedbackDTO> feedbacks = feedbackService.getFeedbacksBySubmissionId(
-        submissionId
-      );
+      List<FeedbackDTO> feedbacks = feedbackService.getFeedbacksBySubmissionId(submissionId);
       return ResponseEntity.ok(feedbacks);
     } catch (Exception e) {
-      System.err.println(
-        "Error en getFeedbacksBySubmission: " + e.getMessage()
-      );
+      logger.error("Error en getFeedbacksBySubmission: {}", e.getMessage(), e);
       return ResponseEntity.badRequest().build();
     }
   }

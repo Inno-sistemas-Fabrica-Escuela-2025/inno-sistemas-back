@@ -3,9 +3,14 @@ package com.udea.fe.controller;
 import com.udea.fe.DTO.ProjectDTO;
 import com.udea.fe.entity.ProjectStatus;
 import com.udea.fe.service.ProjectService;
+
 import jakarta.validation.Valid;
 import java.util.List;
+
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,24 +20,19 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 public class ProjectController {
 
+  private static final Logger logger = LoggerFactory.getLogger(ProjectController.class);
+
   private final ProjectService projectService;
 
   @GetMapping("/my-projects/{userId}")
-  public ResponseEntity<List<ProjectDTO>> getMyProjects(
-    @PathVariable Long userId
-  ) {
+  public ResponseEntity<List<ProjectDTO>> getMyProjects(@PathVariable Long userId) {
     try {
-      System.out.println(
-        "\n ---> Obteniendo proyectos del usuario con ID: " + userId
-      );
+      logger.info("Obteniendo proyectos del usuario con ID: {}", userId);
       List<ProjectDTO> projects = projectService.getProjectsByUserId(userId);
-      System.out.println("Proyectos encontrados: " + projects.size());
+      logger.info("Proyectos encontrados: {}", projects.size());
       return ResponseEntity.ok(projects);
     } catch (Exception e) {
-      System.out.println(
-        "Error al obtener proyectos del usuario con ID: " + userId
-      );
-      e.printStackTrace();
+      logger.error("Error al obtener proyectos del usuario con ID: {}", userId, e);
       return ResponseEntity.status(500).body(null);
     }
   }
