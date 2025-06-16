@@ -4,6 +4,7 @@ import com.udea.fe.DTO.UserDTO;
 import com.udea.fe.entity.Role;
 import com.udea.fe.entity.Status;
 import com.udea.fe.entity.User;
+import com.udea.fe.exception.UserException;
 import com.udea.fe.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -28,15 +28,15 @@ public class UserService {
 
   public UserDTO createUser(UserDTO userDTO) {
     if (userRepository.findByDni(userDTO.getDni()).isPresent()) {
-      throw new RuntimeException("Ya existe un usuario con el DNI proporcionado");
+      throw new UserException("Ya existe un usuario con el DNI proporcionado");
     }
 
     if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
-      throw new RuntimeException("Ya existe un usuario con el email proporcionado");
+      throw new UserException("Ya existe un usuario con el email proporcionado");
     }
 
     if (userDTO.getId() != null && userRepository.existsById(userDTO.getId())) {
-      throw new RuntimeException("Ya existe un usuario con el ID proporcionado");
+      throw new UserException("Ya existe un usuario con el ID proporcionado");
     }
 
     User user = modelMapper.map(userDTO, User.class);
@@ -58,7 +58,7 @@ public class UserService {
     return userRepository
       .findById(id)
       .map(user -> modelMapper.map(user, UserDTO.class))
-      .orElseThrow(() -> new RuntimeException(MSG_USUARIO_NO_ENCONTRADO));
+      .orElseThrow(() -> new UserException(MSG_USUARIO_NO_ENCONTRADO));
   }
 
   public List<UserDTO> getAllUsers() {
@@ -66,7 +66,7 @@ public class UserService {
       .findByRoleNot(Role.ADMIN)
       .stream()
       .map(user -> modelMapper.map(user, UserDTO.class))
-      .collect(Collectors.toList());
+      .toList(); // Reemplazo de .collect(Collectors.toList())
   }
 
   public UserDTO updateUser(Long id, UserDTO userDTO) {
@@ -79,7 +79,7 @@ public class UserService {
         User updatedUser = userRepository.save(existingUser);
         return modelMapper.map(updatedUser, UserDTO.class);
       })
-      .orElseThrow(() -> new RuntimeException(MSG_USUARIO_NO_ENCONTRADO));
+      .orElseThrow(() -> new UserException(MSG_USUARIO_NO_ENCONTRADO));
   }
 
   private void validarCambioDeDni(UserDTO userDTO, User existingUser) {
@@ -88,7 +88,7 @@ public class UserService {
       !userDTO.getDni().equals(existingUser.getDni()) &&
       userRepository.findByDni(userDTO.getDni()).isPresent()
     ) {
-      throw new RuntimeException("Ya existe otro usuario con el mismo DNI");
+      throw new UserException("Ya existe otro usuario con el mismo DNI");
     }
   }
 
@@ -98,7 +98,7 @@ public class UserService {
       !userDTO.getEmail().equals(existingUser.getEmail()) &&
       userRepository.findByEmail(userDTO.getEmail()).isPresent()
     ) {
-      throw new RuntimeException("Ya existe otro usuario con el mismo email");
+      throw new UserException("Ya existe otro usuario con el mismo email");
     }
   }
 
@@ -117,14 +117,14 @@ public class UserService {
   public void deleteUser(Long id) {
     userRepository
       .findById(id)
-      .orElseThrow(() -> new RuntimeException(MSG_USUARIO_NO_ENCONTRADO));
+      .orElseThrow(() -> new UserException(MSG_USUARIO_NO_ENCONTRADO));
     userRepository.deleteById(id);
   }
 
   public void deactivateUser(Long id) {
     User user = userRepository
       .findById(id)
-      .orElseThrow(() -> new RuntimeException(MSG_USUARIO_NO_ENCONTRADO));
+      .orElseThrow(() -> new UserException(MSG_USUARIO_NO_ENCONTRADO));
     user.setStatus(Status.INACTIVE);
     userRepository.save(user);
   }
