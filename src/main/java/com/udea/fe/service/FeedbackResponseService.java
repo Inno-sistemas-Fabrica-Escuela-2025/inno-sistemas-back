@@ -4,6 +4,7 @@ import com.udea.fe.DTO.FeedbackResponseDTO;
 import com.udea.fe.entity.Feedback;
 import com.udea.fe.entity.FeedbackResponse;
 import com.udea.fe.entity.User;
+import com.udea.fe.exception.FeedbackResponseNotFoundException;
 import com.udea.fe.repository.FeedbackRepository;
 import com.udea.fe.repository.FeedbackResponseRepository;
 import com.udea.fe.repository.UserRepository;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -30,11 +30,11 @@ public class FeedbackResponseService {
         FeedbackResponse response = modelMapper.map(dto, FeedbackResponse.class);
 
         Feedback feedback = feedbackRepository.findById(dto.getFeedbackId())
-                .orElseThrow(() -> new RuntimeException("Feedback no encontrado con id: " + dto.getFeedbackId()));
+                .orElseThrow(() -> new FeedbackResponseNotFoundException("Feedback no encontrado con id: " + dto.getFeedbackId()));
         response.setFeedback(feedback);
 
         User createdBy = userRepository.findById(dto.getCreatedById())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + dto.getCreatedById()));
+                .orElseThrow(() -> new FeedbackResponseNotFoundException("Usuario no encontrado con id: " + dto.getCreatedById()));
         response.setCreatedBy(createdBy);
 
         response.setResponseDate(LocalDateTime.now());
@@ -45,14 +45,14 @@ public class FeedbackResponseService {
 
     public FeedbackResponseDTO getFeedbackResponseById(Long id) {
         FeedbackResponse response = feedbackResponseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Respuesta no encontrada con id: " + id));
+                .orElseThrow(() -> new FeedbackResponseNotFoundException("Respuesta no encontrada con id: " + id));
         return modelMapper.map(response, FeedbackResponseDTO.class);
     }
 
     public List<FeedbackResponseDTO> getAllFeedbackResponses() {
         return feedbackResponseRepository.findAll().stream()
                 .map(response -> modelMapper.map(response, FeedbackResponseDTO.class))
-                .collect(Collectors.toList());
+                .toList(); // Reemplazo de .collect(Collectors.toList())
     }
 
     public FeedbackResponseDTO updateFeedbackResponse(Long id, FeedbackResponseDTO dto) {
@@ -62,14 +62,13 @@ public class FeedbackResponseService {
                     FeedbackResponse updated = feedbackResponseRepository.save(response);
                     return modelMapper.map(updated, FeedbackResponseDTO.class);
                 })
-                .orElseThrow(() -> new RuntimeException("Respuesta no encontrada con id: " + id));
+                .orElseThrow(() -> new FeedbackResponseNotFoundException("Respuesta no encontrada con id: " + id));
     }
 
     public void deleteFeedbackResponse(Long id) {
         if (!feedbackResponseRepository.existsById(id)) {
-            throw new RuntimeException("Respuesta no encontrada con id: " + id);
+            throw new FeedbackResponseNotFoundException("Respuesta no encontrada con id: " + id);
         }
         feedbackResponseRepository.deleteById(id);
     }
-
 }

@@ -3,15 +3,17 @@ package com.udea.fe.service;
 import com.udea.fe.DTO.NotificationDTO;
 import com.udea.fe.entity.Notification;
 import com.udea.fe.entity.User;
+import com.udea.fe.exception.NotificationNotFoundException;
+import com.udea.fe.exception.UserNotFoundException;
 import com.udea.fe.repository.NotificationRepository;
 import com.udea.fe.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @Transactional
@@ -27,7 +29,7 @@ public class NotificationService {
 
     User user = userRepository
       .findById(dto.getUserId())
-      .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+      .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
     notification.setUser(user);
     notification.setRead(false);
@@ -40,7 +42,7 @@ public class NotificationService {
   public NotificationDTO getById(Long id) {
     Notification notification = notificationRepository
       .findById(id)
-      .orElseThrow(() -> new RuntimeException("Notificación no encontrada"));
+      .orElseThrow(() -> new NotificationNotFoundException("Notificación no encontrada"));
 
     return modelMapper.map(notification, NotificationDTO.class);
   }
@@ -50,27 +52,28 @@ public class NotificationService {
       .findAll()
       .stream()
       .map(n -> modelMapper.map(n, NotificationDTO.class))
-      .collect(Collectors.toList());
+      .toList(); //  reemplazo por toList()
   }
 
   public List<NotificationDTO> getByUser(String userEmail) {
     User user = userRepository
       .findByEmail(userEmail)
-      .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+      .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
     List<Notification> notifications = notificationRepository.findByUserUserIdAndIsReadFalse(
       user.getUserId()
     );
+
     return notifications
       .stream()
       .map(n -> modelMapper.map(n, NotificationDTO.class))
-      .collect(Collectors.toList());
+      .toList(); // reemplazo por toList()
   }
 
   public NotificationDTO markAsRead(Long id) {
     Notification notification = notificationRepository
       .findById(id)
-      .orElseThrow(() -> new RuntimeException("Notificación no encontrada"));
+      .orElseThrow(() -> new NotificationNotFoundException("Notificación no encontrada"));
 
     if (!notification.isRead()) {
       notification.setReadAt(LocalDateTime.now());
@@ -85,7 +88,7 @@ public class NotificationService {
 
   public void delete(Long id) {
     if (!notificationRepository.existsById(id)) {
-      throw new RuntimeException("Notificación no encontrada");
+      throw new NotificationNotFoundException("Notificación no encontrada");
     }
     notificationRepository.deleteById(id);
   }
