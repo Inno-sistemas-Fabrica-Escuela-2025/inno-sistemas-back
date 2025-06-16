@@ -3,12 +3,13 @@ package com.udea.fe.controller;
 import com.udea.fe.DTO.SubmissionRequestDTO;
 import com.udea.fe.DTO.SubmissionResponseDTO;
 import com.udea.fe.service.SubmissionService;
+
 import java.security.Principal;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,8 +19,12 @@ public class SubmissionController {
 
   private static final Logger logger = LoggerFactory.getLogger(SubmissionController.class);
 
-  @Autowired
-  private SubmissionService submissionService;
+  private final SubmissionService submissionService;
+
+  // Inyección por constructor
+  public SubmissionController(SubmissionService submissionService) {
+    this.submissionService = submissionService;
+  }
 
   @PostMapping
   public ResponseEntity<SubmissionResponseDTO> createSubmission(@RequestBody SubmissionRequestDTO request) {

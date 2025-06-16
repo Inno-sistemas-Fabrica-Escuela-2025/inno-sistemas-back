@@ -5,7 +5,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,8 +19,12 @@ public class TaskAssignmentController {
 
     private static final Logger logger = LoggerFactory.getLogger(TaskAssignmentController.class);
 
-    @Autowired
-    private TaskAssignmentService taskAssignmentService;
+    private final TaskAssignmentService taskAssignmentService;
+
+    // Inyección por constructor
+    public TaskAssignmentController(TaskAssignmentService taskAssignmentService) {
+        this.taskAssignmentService = taskAssignmentService;
+    }
 
     @PostMapping
     public ResponseEntity<TaskAssignmentResponseDTO> assignTask(@RequestBody TaskAssignmentRequestDTO request) {
