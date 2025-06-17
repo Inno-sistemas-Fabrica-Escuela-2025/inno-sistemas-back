@@ -3,6 +3,8 @@ package com.udea.fe.service;
 import com.udea.fe.DTO.WorkspaceDTO;
 import com.udea.fe.entity.Project;
 import com.udea.fe.entity.Workspace;
+import com.udea.fe.exception.ProjectNotFoundException;
+import com.udea.fe.exception.WorkspaceNotFoundException;
 import com.udea.fe.repository.ProjectRepository;
 import com.udea.fe.repository.WorkspaceRepository;
 import jakarta.transaction.Transactional;
@@ -11,12 +13,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
 @AllArgsConstructor
 public class WorkspaceService {
+
     private final WorkspaceRepository workspaceRepository;
     private final ProjectRepository projectRepository;
     private final ModelMapper modelMapper;
@@ -25,7 +27,8 @@ public class WorkspaceService {
         Workspace workspace = modelMapper.map(workspaceDTO, Workspace.class);
 
         Project project = projectRepository.findById(workspaceDTO.getProjectId())
-                .orElseThrow(() -> new RuntimeException("Proyecto no encontrado con id: " + workspaceDTO.getProjectId()));
+                .orElseThrow(() -> new ProjectNotFoundException(
+                        "Proyecto no encontrado con id: " + workspaceDTO.getProjectId()));
         workspace.setProject(project);
 
         Workspace savedWorkspace = workspaceRepository.save(workspace);
@@ -34,14 +37,15 @@ public class WorkspaceService {
 
     public WorkspaceDTO getWorkspaceById(Long id) {
         Workspace workspace = workspaceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Workspace no encontrado con id: " + id));
+                .orElseThrow(() -> new WorkspaceNotFoundException(
+                        "Workspace no encontrado con id: " + id));
         return modelMapper.map(workspace, WorkspaceDTO.class);
     }
 
     public List<WorkspaceDTO> getAllWorkspaces() {
         return workspaceRepository.findAll().stream()
                 .map(workspace -> modelMapper.map(workspace, WorkspaceDTO.class))
-                .collect(Collectors.toList());
+                .toList(); // modern approach
     }
 
     public WorkspaceDTO updateWorkspace(Long id, WorkspaceDTO workspaceDTO) {
@@ -51,20 +55,22 @@ public class WorkspaceService {
 
                     if (workspaceDTO.getProjectId() != null) {
                         Project project = projectRepository.findById(workspaceDTO.getProjectId())
-                                .orElseThrow(() -> new RuntimeException("Proyecto no encontrado con id: " + workspaceDTO.getProjectId()));
+                                .orElseThrow(() -> new ProjectNotFoundException(
+                                        "Proyecto no encontrado con id: " + workspaceDTO.getProjectId()));
                         workspace.setProject(project);
                     }
 
                     Workspace updatedWorkspace = workspaceRepository.save(workspace);
                     return modelMapper.map(updatedWorkspace, WorkspaceDTO.class);
-                }).orElseThrow(() -> new RuntimeException("Workspace no encontrado con id: " + id));
+                })
+                .orElseThrow(() -> new WorkspaceNotFoundException(
+                        "Workspace no encontrado con id: " + id));
     }
 
     public void deleteWorkspace(Long id) {
         if (!workspaceRepository.existsById(id)) {
-            throw new RuntimeException("Workspace no encontrado con id: " + id);
+            throw new WorkspaceNotFoundException("Workspace no encontrado con id: " + id);
         }
         workspaceRepository.deleteById(id);
     }
-
 }
